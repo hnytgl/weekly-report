@@ -59,11 +59,13 @@ router.post('/monthly', authenticateToken, (req, res) => {
   const db = req.db;
 
   // 暂时不插入tasks字段，先让月度计划创建成功
-  // const tasksJson = tasks ? JSON.stringify(tasks) : null;
+   const tasksJson = tasks ? JSON.stringify(tasks) : null;
 
   db.run(
-    'INSERT INTO monthly_plans (user_id, month, year, title, description, objectives, annual_plan_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [req.user.userId, month, year, title, description, objectives, req.body.annual_plan_id || null],
+    // [修复] 在 INSERT 语句中添加 tasks 字段
+    'INSERT INTO monthly_plans (user_id, month, year, title, description, objectives, annual_plan_id, tasks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    // [修复] 添加 tasksJson 到参数列表
+    [req.user.userId, month, year, title, description, objectives, req.body.annual_plan_id || null, tasksJson],
     function(err) {
       if (err) {
         console.error('月度计划插入数据库错误:', err)
